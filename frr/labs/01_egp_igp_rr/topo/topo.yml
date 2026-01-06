@@ -6,22 +6,29 @@ topology:
     image: quay.io/frrouting/frr:10.5.0
 
     binds:
-      - ../configs/r3/daemons:/etc/frr/daemons
+      - ../configs/common/daemons:/etc/frr/daemons
       - ../configs:/configs
 
     exec:
       # 基础
       - sh -c "ip link set lo up"
 
-      # 注入配置（声明式）
-      - sh -c "cp /configs/$(hostname)/frr.conf /etc/frr/frr.conf"
-      - sh -c "cp /configs/$(hostname)/vtysh.conf /etc/frr/vtysh.conf"
+      # 注入 FRR 配置（声明式）
+      - sh -c "cat /configs/common/frr-common.conf /configs/$(hostname)/frr.conf > /etc/frr/frr.conf"
+      - sh -c "cp /configs/common/vtysh.conf /etc/frr/vtysh.conf"
 
       # 权限（FRR 镜像强制要求）
       - sh -c "chown frr:frr /etc/frr/frr.conf"
       - sh -c "chmod 640 /etc/frr/frr.conf"
       - sh -c "chown frr:frrvty /etc/frr/vtysh.conf"
       - sh -c "chmod 660 /etc/frr/vtysh.conf"
+
+      # 显式 reload FRR 配置：
+      # containerlab exec 写入 /etc/frr/frr.conf 发生在 FRR 守护进程启动之后，
+      # bgpd/ospfd 只在启动时读取一次配置文件，不会自动感知文件变更。
+      # vtysh -b 会将磁盘上的配置加载到运行态，避免出现
+      # “配置存在但 BGP instance not found”的问题。
+      - sh -c "vtysh -b"
 
       # ⚠️ 注意：不再手动 vtysh
       # FRR 会在 docker-start → watchfrr 阶段自动加载配置
