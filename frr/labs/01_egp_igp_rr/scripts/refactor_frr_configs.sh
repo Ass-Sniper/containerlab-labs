@@ -15,7 +15,11 @@ mkdir -p "${COMMON_DIR}"
 # -----------------------------
 # Step 1: Extract common daemons / vtysh.conf
 # -----------------------------
-FIRST_NODE=$(ls -d ${CONFIG_DIR}/r* | head -n1)
+FIRST_NODE=$(find "$CONFIG_DIR" -maxdepth 1 -type d -name 'r*' | sort | head -n1)
+if [ -z "$FIRST_NODE" ]; then
+    echo "[!] No rX directories found under $CONFIG_DIR"
+    exit 1
+fi
 
 echo "[*] Using ${FIRST_NODE} as template for common files"
 
