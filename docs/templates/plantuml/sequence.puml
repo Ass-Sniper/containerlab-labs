@@ -1,0 +1,17 @@
+@startuml sequence
+title BGP / OSPF 协议交互时序
+
+participant R1
+participant R3
+participant R4
+
+R1 -> R3 : OSPF Hello
+R3 -> R1 : OSPF Hello
+
+R3 -> R4 : BGP OPEN
+R4 -> R3 : BGP OPEN
+
+R3 -> R4 : BGP UPDATE
+R4 -> R3 : BGP UPDATE
+
+@enduml

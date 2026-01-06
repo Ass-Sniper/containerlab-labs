@@ -1,0 +1,27 @@
+@startuml topology
+title 实验拓扑图（Topology）
+
+node "R1\n(AS65001)" {
+  interface eth1
+}
+
+node "R2\n(AS65001)" {
+  interface eth1
+}
+
+node "R3\n(RR / ASBR)" {
+  interface eth1
+  interface eth2
+}
+
+node "R4\n(RR / ASBR)" {
+  interface eth1
+  interface eth2
+}
+
+R1 -- R3 : iBGP + OSPF
+R2 -- R3 : iBGP + OSPF
+R3 -- R4 : eBGP
+R4 -- R5 : iBGP + OSPF
+
+@enduml

@@ -1,0 +1,17 @@
+@startuml control-plane
+title 控制面路由传播逻辑
+
+rectangle "RR (R3)" {
+  rectangle "Adj-RIB-In"
+  rectangle "Loc-RIB"
+  rectangle "Adj-RIB-Out"
+}
+
+rectangle "Client (R1)"
+
+Client --> "Adj-RIB-In" : UPDATE
+"Adj-RIB-In" --> "Loc-RIB"
+"Loc-RIB" --> "Adj-RIB-Out"
+"Adj-RIB-Out" --> Client : Reflected UPDATE
+
+@enduml
