@@ -1,0 +1,5 @@
+bgpd=yes
+ospfd=yes
+staticd=yes
+
+vtysh_enable=yes
