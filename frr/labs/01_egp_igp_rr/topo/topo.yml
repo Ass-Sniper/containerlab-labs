@@ -1,51 +1,42 @@
 name: egp-igp-rr
 
 topology:
+  defaults:
+    kind: linux
+    image: quay.io/frrouting/frr:10.5.0
+
+    binds:
+      - ../configs/r3/daemons:/etc/frr/daemons
+      - ../configs:/configs
+
+    exec:
+      # 基础
+      - sh -c "ip link set lo up"
+
+      # 注入配置（声明式）
+      - sh -c "cp /configs/$(hostname)/frr.conf /etc/frr/frr.conf"
+      - sh -c "cp /configs/$(hostname)/vtysh.conf /etc/frr/vtysh.conf"
+
+      # 权限（FRR 镜像强制要求）
+      - sh -c "chown frr:frr /etc/frr/frr.conf"
+      - sh -c "chmod 640 /etc/frr/frr.conf"
+      - sh -c "chown frr:frrvty /etc/frr/vtysh.conf"
+      - sh -c "chmod 660 /etc/frr/vtysh.conf"
+
+      # ⚠️ 注意：不再手动 vtysh
+      # FRR 会在 docker-start → watchfrr 阶段自动加载配置
+
   nodes:
-    r1:
-      kind: linux
-      image: quay.io/frrouting/frr:10.5.0
-      exec:
-        - ip link set lo up
-
-    r2:
-      kind: linux
-      image: quay.io/frrouting/frr:10.5.0
-      exec:
-        - ip link set lo up
-
-    r3:   # AS65001 RR + ASBR
-      kind: linux
-      image: quay.io/frrouting/frr:10.5.0
-      exec:
-        - ip link set lo up
-
-    r4:   # AS65002 RR + ASBR
-      kind: linux
-      image: quay.io/frrouting/frr:10.5.0
-      exec:
-        - ip link set lo up
-
-    r5:
-      kind: linux
-      image: quay.io/frrouting/frr:10.5.0
-      exec:
-        - ip link set lo up
-
-    r6:
-      kind: linux
-      image: quay.io/frrouting/frr:10.5.0
-      exec:
-        - ip link set lo up
+    r1: {}
+    r2: {}
+    r3: {}
+    r4: {}
+    r5: {}
+    r6: {}
 
   links:
-    # AS65001
     - endpoints: ["r1:eth1", "r3:eth1"]
     - endpoints: ["r2:eth1", "r3:eth2"]
-
-    # eBGP
     - endpoints: ["r3:eth3", "r4:eth3"]
-
-    # AS65002
     - endpoints: ["r4:eth1", "r5:eth1"]
     - endpoints: ["r4:eth2", "r6:eth1"]
