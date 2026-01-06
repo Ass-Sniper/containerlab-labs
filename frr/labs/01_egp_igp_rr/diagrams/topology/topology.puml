@@ -1,0 +1,64 @@
+@startuml Experiment 01
+title Experiment 01: EGP / IGP Hierarchy with Route Reflector (FRR 10.5.0)
+
+skinparam linetype ortho
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor<<AS>> #EEF7FF
+  BorderColor #2C5AA0
+}
+skinparam node {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+}
+
+' =========================
+' AS 65001
+' =========================
+rectangle "AS 65001\n(IGP: OSPF / iBGP + RR)" <<AS>> {
+
+  node "r1\nRR Client\nlo: 1.1.1.1/32" as r1
+  node "r2\nRR Client\nlo: 2.2.2.2/32" as r2
+
+  node "r3\nRR + ASBR\nlo: 3.3.3.3/32" as r3
+
+  r1 -- r3 : iBGP (lo)\nOSPF\n10.0.13.0/30
+  r2 -- r3 : iBGP (lo)\nOSPF\n10.0.23.0/30
+}
+
+' =========================
+' AS 65002
+' =========================
+rectangle "AS 65002\n(IGP: OSPF / iBGP + RR)" <<AS>> {
+
+  node "r5\nRR Client\nlo: 5.5.5.5/32" as r5
+  node "r6\nRR Client\nlo: 6.6.6.6/32" as r6
+
+  node "r4\nRR + ASBR\nlo: 4.4.4.4/32" as r4
+
+  r5 -- r4 : iBGP (lo)\nOSPF\n20.0.45.0/30
+  r6 -- r4 : iBGP (lo)\nOSPF\n20.0.46.0/30
+}
+
+' =========================
+' Inter-AS
+' =========================
+r3 -- r4 : eBGP\n172.16.34.0/30
+
+' =========================
+' Notes
+' =========================
+note right of r3
+- Route Reflector (RR)
+- AS Border Router (ASBR)
+- iBGP via Loopback
+- next-hop-self
+end note
+
+note left of r4
+- Route Reflector (RR)
+- AS Border Router (ASBR)
+- Reflects eBGP routes
+end note
+
+@enduml

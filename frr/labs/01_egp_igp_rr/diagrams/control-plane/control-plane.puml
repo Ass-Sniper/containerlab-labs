@@ -1,0 +1,65 @@
+@startuml Experiment 01
+title Control Plane View - EGP / IGP with Route Reflector
+
+skinparam linetype ortho
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam ArrowColor #333333
+
+' =========================
+' AS 65001
+' =========================
+package "AS 65001" {
+
+  node "r1\nClient\nlo1" as r1
+  node "r2\nClient\nlo2" as r2
+  node "r3\nRR + ASBR\nlo3" as r3
+
+  r1 --> r3 : OSPF\n(area 0)
+  r2 --> r3 : OSPF\n(area 0)
+
+  r1 --> r3 : iBGP\n(update-source lo)
+  r2 --> r3 : iBGP\n(update-source lo)
+}
+
+' =========================
+' AS 65002
+' =========================
+package "AS 65002" {
+
+  node "r5\nClient\nlo5" as r5
+  node "r6\nClient\nlo6" as r6
+  node "r4\nRR + ASBR\nlo4" as r4
+
+  r5 --> r4 : OSPF\n(area 0)
+  r6 --> r4 : OSPF\n(area 0)
+
+  r5 --> r4 : iBGP\n(update-source lo)
+  r6 --> r4 : iBGP\n(update-source lo)
+}
+
+' =========================
+' Inter-AS EGP
+' =========================
+r3 --> r4 : eBGP\n(AS65001 ↔ AS65002)\nnext-hop-self
+
+' =========================
+' Notes
+' =========================
+note right of r3
+IGP:
+- OSPF only inside AS
+- ensures loopback reachability
+
+BGP:
+- iBGP via RR
+- no full-mesh
+end note
+
+note left of r4
+eBGP:
+- exchanged only between ASBRs
+- AS boundary strictly enforced
+end note
+
+@enduml

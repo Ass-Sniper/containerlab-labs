@@ -1,0 +1,53 @@
+@startuml Experiment 01
+title BGP Route Reflection & EGP/IGP Interaction Sequence
+
+autonumber
+skinparam shadowing false
+
+participant r1 as "r1\nAS65001\nClient"
+participant r3 as "r3\nAS65001\nRR + ASBR"
+participant r4 as "r4\nAS65002\nRR + ASBR"
+participant r5 as "r5\nAS65002\nClient"
+
+== Phase 1: IGP Convergence ==
+
+r1 -> r3 : OSPF Hello
+r3 -> r1 : OSPF Full
+
+r5 -> r4 : OSPF Hello
+r4 -> r5 : OSPF Full
+
+note over r1,r3
+OSPF ensures loopback reachability
+before iBGP starts
+end note
+
+== Phase 2: iBGP Sessions ==
+
+r1 -> r3 : iBGP OPEN\n(update-source lo1)
+r3 -> r1 : iBGP KEEPALIVE
+
+r5 -> r4 : iBGP OPEN\n(update-source lo5)
+r4 -> r5 : iBGP KEEPALIVE
+
+== Phase 3: eBGP Exchange ==
+
+r3 -> r4 : eBGP OPEN
+r4 -> r3 : eBGP KEEPALIVE
+
+r3 -> r4 : UPDATE\n(1.1.1.1/32, 2.2.2.2/32)
+r4 -> r3 : UPDATE\n(5.5.5.5/32)
+
+== Phase 4: Route Reflection ==
+
+r4 -> r5 : RR UPDATE\n(1.1.1.1/32, 2.2.2.2/32)
+
+r3 -> r1 : RR UPDATE\n(5.5.5.5/32)
+r3 -> r1 : RR UPDATE\n(6.6.6.6/32)
+
+note over r1
+Client learns external routes
+without iBGP full-mesh
+end note
+
+@enduml

@@ -1,0 +1,51 @@
+name: egp-igp-rr
+
+topology:
+  nodes:
+    r1:
+      kind: linux
+      image: quay.io/frrouting/frr:10.5.0
+      exec:
+        - ip link set lo up
+
+    r2:
+      kind: linux
+      image: quay.io/frrouting/frr:10.5.0
+      exec:
+        - ip link set lo up
+
+    r3:   # AS65001 RR + ASBR
+      kind: linux
+      image: quay.io/frrouting/frr:10.5.0
+      exec:
+        - ip link set lo up
+
+    r4:   # AS65002 RR + ASBR
+      kind: linux
+      image: quay.io/frrouting/frr:10.5.0
+      exec:
+        - ip link set lo up
+
+    r5:
+      kind: linux
+      image: quay.io/frrouting/frr:10.5.0
+      exec:
+        - ip link set lo up
+
+    r6:
+      kind: linux
+      image: quay.io/frrouting/frr:10.5.0
+      exec:
+        - ip link set lo up
+
+  links:
+    # AS65001
+    - endpoints: ["r1:eth1", "r3:eth1"]
+    - endpoints: ["r2:eth1", "r3:eth2"]
+
+    # eBGP
+    - endpoints: ["r3:eth3", "r4:eth3"]
+
+    # AS65002
+    - endpoints: ["r4:eth1", "r5:eth1"]
+    - endpoints: ["r4:eth2", "r6:eth1"]
